@@ -1,15 +1,17 @@
 -- CreateTable
 CREATE TABLE "Salary" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "company" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "level" TEXT NOT NULL,
     "location" TEXT NOT NULL,
-    "baseSalary" REAL NOT NULL,
-    "stock" REAL NOT NULL,
-    "bonus" REAL NOT NULL,
-    "totalComp" REAL NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "baseSalary" DOUBLE PRECISION NOT NULL,
+    "stock" DOUBLE PRECISION NOT NULL,
+    "bonus" DOUBLE PRECISION NOT NULL,
+    "totalComp" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Salary_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
