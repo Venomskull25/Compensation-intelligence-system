@@ -18,16 +18,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# local env files
+# env files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# prisma
-/prisma/dev.db
-/prisma/dev.db-journal
 
 # typescript
 *.tsbuildinfo
@@ -36,6 +32,7 @@ next-env.d.ts
 # IDE
 .vscode/*
 !.vscode/extensions.json
+.idea
 
 # coverage
 /coverage
@@ -43,5 +40,10 @@ next-env.d.ts
 # logs
 logs
 *.log
+
+# unwanted files
 AGENTS.md
 CLAUDE.md
+
+# vercel
+.vercel
