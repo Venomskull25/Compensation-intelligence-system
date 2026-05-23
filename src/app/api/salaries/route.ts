@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createSalarySchema } from "@/lib/validation";
-import { normalizeCompanyName } from "@/lib/normalize";
 import { SalaryService } from "@/lib/services/salary.service";
 
 export async function GET(req: NextRequest) {
@@ -20,7 +18,8 @@ export async function GET(req: NextRequest) {
       company:
         searchParams.get("company") || undefined,
 
-      role: searchParams.get("role") || undefined,
+      role:
+        searchParams.get("role") || undefined,
 
       location:
         searchParams.get("location") || undefined,
@@ -43,43 +42,9 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(result);
-  } catch {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch salaries",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-
-    const validated =
-      createSalarySchema.parse(body);
-
-    validated.company = normalizeCompanyName(
-      validated.company
-    );
-
-    const salary =
-      await SalaryService.createSalary(validated);
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: salary,
-      },
-      {
-        status: 201,
-      }
-    );
   } catch (error: unknown) {
+    console.error("SALARIES API ERROR:", error);
+
     return NextResponse.json(
       {
         success: false,
@@ -88,9 +53,11 @@ export async function POST(req: NextRequest) {
           error instanceof Error
             ? error.message
             : "Unknown error",
+
+        fullError: String(error),
       },
       {
-        status: 400,
+        status: 500,
       }
     );
   }
