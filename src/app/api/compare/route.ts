@@ -20,6 +20,11 @@ export async function POST(req: NextRequest) {
       data: comparison,
     });
   } catch (error: unknown) {
+    console.error(
+      "COMPARE API ERROR:",
+      error
+    );
+
     return NextResponse.json(
       {
         success: false,
@@ -28,9 +33,11 @@ export async function POST(req: NextRequest) {
           error instanceof Error
             ? error.message
             : "Unknown error",
+
+        fullError: String(error),
       },
       {
-        status: 400,
+        status: 500,
       }
     );
   }
