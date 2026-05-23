@@ -1,29 +1,70 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { prisma } from "@/lib/prisma";
 import { compareSchema } from "@/lib/validation";
-import { SalaryService } from "@/lib/services/salary.service";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const validated =
-      compareSchema.parse(body);
+    const validated = compareSchema.parse(body);
 
-    const result =
-      await SalaryService.compareSalaries(
-        validated.ids
+    const salaries = await prisma.salary.findMany({
+      where: {
+        id: {
+          in: validated.ids,
+        },
+      },
+    });
+
+    if (salaries.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No salaries found",
+        },
+        {
+          status: 404,
+        }
       );
+    }
+
+    const highestTC = salaries.reduce(
+      (prev, current) =>
+        prev.totalComp > current.totalComp
+          ? prev
+          : current
+    );
+
+    const lowestTC = salaries.reduce(
+      (prev, current) =>
+        prev.totalComp < current.totalComp
+          ? prev
+          : current
+    );
 
     return NextResponse.json({
       success: true,
-      data: result,
+
+      data: {
+        salaries,
+
+        highestTC,
+
+        compensationGap:
+          highestTC.totalComp -
+          lowestTC.totalComp,
+      },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
       },
       {
         status: 400,

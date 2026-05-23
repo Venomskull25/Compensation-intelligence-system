@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeCompanyName } from "@/lib/normalize";
-import { SalaryService } from "@/lib/services/salary.service";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   context: {
     params: Promise<{
       name: string;
@@ -12,29 +12,51 @@ export async function GET(
   }
 ) {
   try {
-    const params =
-      await context.params;
+    const params = await context.params;
 
-    const company =
-      normalizeCompanyName(
-        params.name
-      );
+    const company = normalizeCompanyName(
+      params.name
+    );
 
-    const result =
-      await SalaryService.getCompanyStats(
-        company
-      );
+    const stats = await prisma.salary.aggregate({
+      where: {
+        company,
+      },
+
+      _avg: {
+        baseSalary: true,
+        stock: true,
+        bonus: true,
+        totalComp: true,
+      },
+
+      _count: true,
+    });
 
     return NextResponse.json({
       success: true,
-      data: result,
+
+      data: {
+        company,
+
+        averageBaseSalary:
+          stats._avg.baseSalary,
+
+        averageStock: stats._avg.stock,
+
+        averageBonus: stats._avg.bonus,
+
+        averageTotalComp:
+          stats._avg.totalComp,
+
+        totalEntries: stats._count,
+      },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error:
-          "Failed to fetch company stats",
+        error: "Failed to fetch company stats",
       },
       {
         status: 500,

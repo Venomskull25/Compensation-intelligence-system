@@ -8,65 +8,42 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const page =
-      Number(searchParams.get("page")) || 1;
+    const page = Number(searchParams.get("page")) || 1;
 
     const limit =
       Number(searchParams.get("limit")) || 10;
 
-    const result =
-      await SalaryService.getSalaries({
-        page,
-        limit,
+    const result = await SalaryService.getSalaries({
+      page,
+      limit,
 
-        company:
-          searchParams.get("company") ||
-          undefined,
+      company:
+        searchParams.get("company") || undefined,
 
-        role:
-          searchParams.get("role") ||
-          undefined,
+      role: searchParams.get("role") || undefined,
 
-        location:
-          searchParams.get("location") ||
-          undefined,
+      location:
+        searchParams.get("location") || undefined,
 
-        minSalary: searchParams.get(
-          "minSalary"
-        )
-          ? Number(
-              searchParams.get(
-                "minSalary"
-              )
-            )
-          : undefined,
+      minSalary: searchParams.get("minSalary")
+        ? Number(searchParams.get("minSalary"))
+        : undefined,
 
-        maxSalary: searchParams.get(
-          "maxSalary"
-        )
-          ? Number(
-              searchParams.get(
-                "maxSalary"
-              )
-            )
-          : undefined,
+      maxSalary: searchParams.get("maxSalary")
+        ? Number(searchParams.get("maxSalary"))
+        : undefined,
 
-        sortBy:
-          searchParams.get("sortBy") ||
-          "createdAt",
+      sortBy:
+        searchParams.get("sortBy") || "createdAt",
 
-        order:
-          (searchParams.get(
-            "order"
-          ) as "asc" | "desc") ||
-          "desc",
-      });
-
-    return NextResponse.json({
-      success: true,
-      ...result,
+      order:
+        (searchParams.get("order") as
+          | "asc"
+          | "desc") || "desc",
     });
-  } catch (error) {
+
+    return NextResponse.json(result);
+  } catch {
     return NextResponse.json(
       {
         success: false,
@@ -86,15 +63,12 @@ export async function POST(req: NextRequest) {
     const validated =
       createSalarySchema.parse(body);
 
-    validated.company =
-      normalizeCompanyName(
-        validated.company
-      );
+    validated.company = normalizeCompanyName(
+      validated.company
+    );
 
     const salary =
-      await SalaryService.createSalary(
-        validated
-      );
+      await SalaryService.createSalary(validated);
 
     return NextResponse.json(
       {
@@ -105,11 +79,15 @@ export async function POST(req: NextRequest) {
         status: 201,
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
       },
       {
         status: 400,
